@@ -27,12 +27,12 @@ class TrigLvl1;
 
 using namespace std;
 
-class PmMpc13: public SubsysReco
+class RcMpc09: public SubsysReco
 {
 public:
 
-  PmMpc13(char *_foutfile);
-  virtual ~PmMpc13(){}
+  RcMpc09(char *_foutfile);
+  virtual ~RcMpc09(){}
 
   int Init(PHCompositeNode *topNode);
   int InitRun(PHCompositeNode *topNode);

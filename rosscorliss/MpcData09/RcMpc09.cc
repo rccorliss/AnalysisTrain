@@ -6,7 +6,7 @@
 #include "TriggerHelper.h"
 
 
-#include "PmMpc13.hh"
+#include "RcMpc09.hh"
 #include "mpcRawContainer.h"
 #include "mpcRawContent.h"
 #include "mpcClusterContainer.h"
@@ -84,7 +84,7 @@ int PmMpc13::InitRun(PHCompositeNode *topNode)
   return EVENT_OK;
 }
 
-PmMpc13::PmMpc13(char *_foutfile) : SubsysReco("PmMpc13")
+RcMpc09::RcMpc09(char *_foutfile) : SubsysReco("RcMpc09")
 {
   outfile = _foutfile;
   run = 0;
@@ -187,19 +187,19 @@ PmMpc13::PmMpc13(char *_foutfile) : SubsysReco("PmMpc13")
 
 }
 
-int PmMpc13::Init(PHCompositeNode *topNode)
+int RcMpc09::Init(PHCompositeNode *topNode)
 {
   return 0;
 }
 
-int PmMpc13::End(PHCompositeNode *topNode)
+int RcMpc09::End(PHCompositeNode *topNode)
 {
   file->Write();
   delete file;
   return 0;
 }
 
-int PmMpc13::ResetVars()
+int RcMpc09::ResetVars()
 {
   event = 0;
   nclus = 0;
@@ -237,11 +237,11 @@ int PmMpc13::ResetVars()
   return 0;
 }
 
-int PmMpc13::process_event(PHCompositeNode *topNode)
+int RcMpc09::process_event(PHCompositeNode *topNode)
 {
 
 
-  if (ievent % 10000 == 0){cout << "PmMpc13 event = " << ievent << endl;}
+  if (ievent % 10000 == 0){cout << "RcMpc09 event = " << ievent << endl;}
   ievent++;
   //if (ievent > 300000) return ABORTRUN;//Taking some chunk of data for calibrations
   phglobal = getClass<PHGlobal>(topNode,"PHGlobal");
@@ -361,7 +361,7 @@ int PmMpc13::process_event(PHCompositeNode *topNode)
   return EVENT_OK;
 }
 
-TLorentzVector PmMpc13::vectorize(mpcClusterContent *clus)
+TLorentzVector RcMpc09::vectorize(mpcClusterContent *clus)
 {
   double zvtx = phglobal->getBbcZVertex();
   double x = clus->x();
