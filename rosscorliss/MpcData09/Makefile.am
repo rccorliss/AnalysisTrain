@@ -3,11 +3,11 @@ AUTOMAKE_OPTIONS = foreign
 INCLUDES = -I$(includedir) -I$(OFFLINE_MAIN)/include -I$(ROOTSYS)/include
 
 lib_LTLIBRARIES = \
-  libpmmpc13.la 
+  librcmpc09.la 
 
 include_HEADERS =
 
-libpmmpc13_la_LIBADD = \
+librcmpc09_la_LIBADD = \
   -L$(libdir) \
   -L${ROOTSYS}/lib \
   -L$(OFFLINE_MAIN)/lib \
@@ -19,9 +19,9 @@ libpmmpc13_la_LIBADD = \
   -lTOAD \
   -lmpc 
 
-libpmmpc13_la_SOURCES = \
-  PmMpc13.cc \
-  PmMpc13_Dict.C
+librcmpc09_la_SOURCES = \
+  RcMpc09.cc \
+  RcMpc09_Dict.C
 
 BUILT_SOURCES = \
   testexternals.C
@@ -30,7 +30,7 @@ noinst_PROGRAMS = \
   testexternals
 
 testexternals_LDADD = \
-  libpmmpc13.la
+  librcmpc09.la
 
 testexternals.C:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@
@@ -40,9 +40,9 @@ testexternals.C:
 	echo "}" >> $@
 
 # Rule for generating CINT dictionaries from class headers.
-PmMpc13_Dict.C: \
-	PmMpc13.hh \
-	PmMpc13LinkDef.h
+RcMpc09_Dict.C: \
+	RcMpc09.hh \
+	RcMpc09LinkDef.h
 		rootcint -f $@ -c $(DEFAULT_INCLUDES) $(INCLUDES) $^
 
 dist_pkgdata_DATA = \
