@@ -37,7 +37,7 @@
 using namespace std;
 using namespace findNode;
 
-int PmMpc13::InitRun(PHCompositeNode *topNode)
+int RcMpc09::InitRun(PHCompositeNode *topNode)
 {
   recoConsts *rc = recoConsts::instance();
   run = rc->get_IntFlag("RUNNUMBER");
