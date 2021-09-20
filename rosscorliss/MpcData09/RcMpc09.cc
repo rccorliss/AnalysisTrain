@@ -41,46 +41,6 @@ int RcMpc09::InitRun(PHCompositeNode *topNode)
 {
   recoConsts *rc = recoConsts::instance();
   run = rc->get_IntFlag("RUNNUMBER");
-
-  // mpccalib = MpcCalib::instance();
-  // mpcmap = MpcMap::instance();
-
-  // //char outfile[200];
-  // //sprintf(outfile,"/direct/phenix+spin/phnxsp01/cmckinn4/run11pp500GeV/mpc_clusters/minbias/skimtree_run_%i.root",run);
-  // file = new TFile(outfile,"RECREATE");
-  // T = new TTree("T","T");
-
-  // T->Branch("event",&event,"event/I");
-  // T->Branch("nclus",&nclus,"nclus/I");
-  // //T->Branch("ntow",&ntow,"ntow/I");
-  // T->Branch("bbcvtx",&bbcvtx,"bbcvtx/F");
-  // T->Branch("zdcvtx",&zdcvtx,"zdcvtx/F");
-  // T->Branch("bunch",&bunch,"bunch/S");
-  // T->Branch("trig",&trig,"trig/S");
-
-  // T->Branch("ecore",ecore,"ecore[nclus]/F");
-  // T->Branch("feecore",feecore,"feecore[nclus]/S");
-  // T->Branch("pt",pt,"pt[nclus]/F");
-
-  // T->Branch("x",x,"x[nclus]/F");
-  // T->Branch("y",y,"y[nclus]/F");
-  // T->Branch("z",z,"z[nclus]/F");
-
-  // T->Branch("mult",mult,"mult[nclus]/S");
-  // T->Branch("disp",disp,"disp[nclus]/F");
-  // //T->Branch("dispy",dispy,"dispy[nclus]/F");
-  // T->Branch("chi2core",chi2core,"chi2core[nclus]/F");
-
-  // /*
-  // T->Branch("lg_adc_core",lg_adc_core,"lg_adc_core[nclus]/F");
-  // T->Branch("hg_adc_core",hg_adc_core,"hg_adc_core[nclus]/F");
-  // */
-  // T->Branch("tdc_max",tdc_max,"tdc_max[nclus]/S");
-  // T->Branch("lg_post_core",lg_post_core,"lg_post_core[nclus]/S");
-
-  // //T->Branch("etow",etow,"etow[ntow]/F");
-  // //T->Branch("chtow",chtow,"chtow[ntow]/S");
-
   return EVENT_OK;
 }
 
@@ -90,11 +50,11 @@ RcMpc09::RcMpc09(char *_foutfile) : SubsysReco("RcMpc09")
   run = 0;
   ievent = 0;
 
+  //load calibration settings 
   mpccalib = MpcCalib::instance();
   mpcmap = MpcMap::instance();
 
-  //char outfile[200];
-  //sprintf(outfile,"/direct/phenix+spin/phnxsp01/cmckinn4/run11pp500GeV/mpc_clusters/minbias/skimtree_run_%i.root",run);
+  //set up our output tree:
   file = new TFile(outfile,"RECREATE");
   T = new TTree("T","T");
 
@@ -114,15 +74,11 @@ RcMpc09::RcMpc09(char *_foutfile) : SubsysReco("RcMpc09")
   T->Branch("y",y,"y[nclus]/F");
   T->Branch("z",z,"z[nclus]/F");
 
+  //cluster features:  mult (ntowers in cluster), disp (dispersion), chi2core (photon/neutron fit goodness in central tower)
   T->Branch("mult",mult,"mult[nclus]/S");
   T->Branch("disp",disp,"disp[nclus]/F");
-  //T->Branch("dispy",dispy,"dispy[nclus]/F");
   T->Branch("chi2core",chi2core,"chi2core[nclus]/F");
 
-  /*
-      T->Branch("lg_adc_core",lg_adc_core,"lg_adc_core[nclus]/F");
-        T->Branch("hg_adc_core",hg_adc_core,"hg_adc_core[nclus]/F");
-  */
   T->Branch("tdc_max",tdc_max,"tdc_max[nclus]/S");
   T->Branch("lg_post_core",lg_post_core,"lg_post_core[nclus]/S");
 
@@ -253,14 +209,27 @@ int RcMpc09::process_event(PHCompositeNode *topNode)
 
   ResetVars();
 
-  if ((!(mpctow)) || (!(mpcclus))) cout << "Missing node." << endl;
+  if (!mpctow) {cout << "Event " << ievent << "is missing mpctow node." << endl;}
+  if (!mpcclus)  {cout << "Event " << ievent << "is missing mpcclus node." << endl;}
   event=ievent;
-  trig |= trighelp.trigScaled("BBCLL1(>0 tubes)") << 0;
-  trig |= trighelp.trigScaled("BBCLL1(>0 tubes) novertex") << 1;
-  trig |= trighelp.trigScaled("BBCLL1(>0 tubes) narrowvtx") << 2;
-  trig |= trighelp.trigScaled("ZDCLL1wide") << 3;
-  trig |= trighelp.trigScaled("MPC_A") << 4;
-  trig |= trighelp.trigScaled("MPC_B") << 5;
+  const bool run9=true;
+  const bool run13=!run9;
+  if(run9){
+    trig |= trighelp.trigScaled("BBCLL1(>0 tubes)") << 0; //minbias with vertex?
+    trig |= trighelp.trigScaled("BBCLL1(>0 tubes) novertex)") <<1; //minbias no vertex
+    trig |= trighelp.trigScaled("BBCLL1(>0 tubes) narrowvtx") << 2; //doesn't exist?
+    trig |= trighelp.trigScaled("ZDCLL1wide") << 3;
+    trig |= trighelp.trigScaled("MPC_4x4A") << 4; //equivalent of MPC_A in run13, I hope
+    //trig |= trighelp.trigScaled("MPC_B") << 5; //doesn't exist in run9 pp500
+  }
+  else if (run13){//pp510
+    trig |= trighelp.trigScaled("BBCLL1(>0 tubes)") << 0;
+    trig |= trighelp.trigScaled("BBCLL1(>0 tubes) novertex") << 1;
+    trig |= trighelp.trigScaled("BBCLL1(>0 tubes) narrowvtx") << 2;
+    trig |= trighelp.trigScaled("ZDCLL1wide") << 3;
+    trig |= trighelp.trigScaled("MPC_A") << 4;
+    trig |= trighelp.trigScaled("MPC_B") << 5;
+  }   
   // trig |= trighelp.trigScaled("MPC4x4c&ERTLL1_2x2") << 6;
 
   bbcvtx = phglobal->getBbcZVertex();
@@ -286,8 +255,6 @@ int RcMpc09::process_event(PHCompositeNode *topNode)
       TLorentzVector v = vectorize(clus);
       //cluster variables
       ecore[nclus] = clus->ecore();
-      //if (ecore[nclus] < 1.8) continue;
-      //if (ecore[nclus] < 1.5) continue;
       feecore[nclus] = clus->towerid(0);
       pt[nclus] = v.Pt();
       if (pt[nclus]<1.35) continue;
@@ -316,44 +283,11 @@ int RcMpc09::process_event(PHCompositeNode *topNode)
 	}
       }
       lg_post_core[nclus] = lg_post;
-      /*
-	    float loped = mpccalib->get_ped_lgpost(cent_id,post_amu)-mpccalib->get_ped_lgpre(cent_id,pre_amu);
-	        float hiped = mpccalib->get_ped_hgpost(cent_id,post_amu) - mpccalib->get_ped_hgpre(cent_id,pre_amu);
-		    float lg_pre = raw->get_lopre();
-		        float lg_post = raw->get_lopost();
-			    float hg_pre = raw->get_hipre();
-			        float hg_post = raw->get_hipost();
-				    float tdc = raw->get_tdc();
-
-				        float lg_adc = lg_post - lg_pre - loped;
-					    float hg_adc = hg_post - hg_pre - hiped;
-
-					        lg_adc_core[nclus] = lg_adc;
-						    hg_adc_core[nclus] = hg_adc;
-						        lg_post_core[nclus] = lg_post;
-							    tdc_core[nclus] = tdc;
-      */
-      /*
-	    if (mult[nclus]>0){
-	          for (int itow = 0; itow < mult[nclus]; itow++)
-		        {
-			        chtow[towcount] = clus->towerid(itow);
-				        etow[towcount] = clus->partesum(itow);
-					        towcount++;
-						      }
-						          }
-      */
       nclus++;
     }
 
   ntow = towcount;
-  /*
-      int fntow = ntow;
-        for (int itow = 0; itow < ntow; itow++){
-	    if (chtow[itow] == -1) fntow--;
-	      }
-	        ntow = fntow;
-  */
+
   if (nclus>0){
     T->Fill();
     if( T->GetEntries() % 10000 == 0 ) cout << "TTree Entries = " << T->GetEntries() << endl;
