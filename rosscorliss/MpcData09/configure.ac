@@ -1,0 +1,15 @@
+AC_INIT
+
+AM_INIT_AUTOMAKE(RcMpc09, 1.00)
+
+AC_PROG_CXX(CC g++)
+AC_ENABLE_STATIC(no)
+AC_PROG_LIBTOOL
+
+dnl   no point in suppressing warnings people should 
+dnl   at least see them, so here we go for g++: -Wall
+if test $ac_cv_prog_gxx = yes; then
+CXXFLAGS="$CXXFLAGS -Wall -Werror"
+fi
+
+AC_OUTPUT(Makefile)
