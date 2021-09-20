@@ -275,7 +275,7 @@ int RcMpc09::process_event(PHCompositeNode *topNode)
       if ((cent_id < 0) || (cent_id > 575)) cout << "Channel num error." << endl;
       tdc_max[nclus] = clus->rawtdc();
       float lg_post = 0;
-      for (int rtow = 0; rtow < mpctow->size(); rtow++){
+      for (int rtow = 0; rtow < (int)mpctow->size(); rtow++){
 	mpcTowerContent *tow = mpctow->getTower(rtow);
 	if (tow->get_ch() == cent_id){
 	  lg_post = tow->get_energy();
